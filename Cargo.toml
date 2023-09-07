@@ -5,6 +5,7 @@ version = "0.3.63"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/oranda-gallery/cargodisttest"
+authors = ["axo.dev"]
 
 [package.metadata.wix]
 upgrade-guid = "E5924582-F1A9-425E-93E5-9288EDD001E6"
@@ -25,11 +26,11 @@ lto = "thin"
 # Config for 'cargo dist'
 [workspace.metadata.dist]
 # The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.3.0-prerelease.1"
+cargo-dist-version = "0.3.0-prerelease.2"
 # CI backends to support (see 'cargo dist generate-ci')
 ci = ["github"]
 # The installers to generate for each app
-installers = ["shell", "powershell", "npm", "homebrew"]
+installers = ["shell", "powershell", "npm", "homebrew", "msi"]
 # The archive format to use for windows builds (defaults .zip)
 windows-archive = ".tar.gz"
 # The archive format to use for non-windows builds (defaults .tar.xz)

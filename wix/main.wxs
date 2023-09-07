@@ -61,8 +61,8 @@
     <Product
         Id='*'
         Name='cargodisttest'
-        UpgradeCode='15037EEC-3719-425C-9A78-857F756E5868'
-        Manufacturer='axodotdev'
+        UpgradeCode='E5924582-F1A9-425E-93E5-9288EDD001E6'
+        Manufacturer='axo.dev'
         Language='1033'
         Codepage='1252'
         Version='$(var.Version)'>
@@ -70,7 +70,7 @@
         <Package Id='*'
             Keywords='Installer'
             Description='💬 a CLI for learning to distribute CLIs in rust'
-            Manufacturer='axodotdev'
+            Manufacturer='axo.dev'
             InstallerVersion='450'
             Languages='1033'
             Compressed='yes'
@@ -110,7 +110,7 @@
                     -->
 
                     <Directory Id='Bin' Name='bin'>
-                        <Component Id='Path' Guid='D490568E-592C-4F8D-A80C-C3B7AD7C69D6' KeyPath='yes'>
+                        <Component Id='Path' Guid='8C892A34-A046-45BB-A2D2-30C1AE4BA944' KeyPath='yes'>
                             <Environment
                                 Id='PATH'
                                 Name='PATH'

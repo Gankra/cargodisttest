@@ -173,37 +173,9 @@ jobs:
           path: |
             ${{ steps.cargo-dist.outputs.paths }}
             ${{ env.BUILD_MANIFEST_NAME }}
-
-  # Create a Github Release with all the results once everything is done
-  host-release:
-    needs:
-      - plan
-      - upload-global-artifacts
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      UPLOAD_URL: ${{ fromJson(needs.plan.outputs.val).hosting.upload_url }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: "Download artifacts"
-        uses: actions/download-artifact@v3
-        with:
-          name: artifacts
-          path: artifacts
-      - name: Cleanup
+      - name: "Host artifacts"
         run: |
-          # Remove the granular manifests
-          rm artifacts/*-dist-manifest.json
-      - name: Host Artifacts
-        run: |
-          echo "uploading to $UPLOAD_URL"
-          for file in artifacts/*; do
-            [[ -e $file ]] && mv "$SIGN_DIR_IN" && echo "uploading $file";
-          done
-          echo "...done!"
-
+          cargo dist host ${{ needs.plan.outputs.tag-flag }}
 
   should-publish:
     needs:

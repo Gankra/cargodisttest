@@ -197,10 +197,12 @@ jobs:
           # Remove the granular manifests
           rm artifacts/*-dist-manifest.json
       - name: Host Artifacts
-        echo "uploading to $UPLOAD_URL"
-        for file in artifacts/*; do
-          [[ -e $file ]] && mv "$SIGN_DIR_IN" && echo "uploading $file";
-        done
+        run: |
+          echo "uploading to $UPLOAD_URL"
+          for file in artifacts/*; do
+            [[ -e $file ]] && mv "$SIGN_DIR_IN" && echo "uploading $file";
+          done
+          echo "...done!"
 
 
   should-publish:

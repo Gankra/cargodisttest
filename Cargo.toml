@@ -43,4 +43,5 @@ npm-scope = "@axodotdev"
 create-release = false
 # Publish jobs to run in CI
 pr-run-mode = "upload"
-
+# Where to host releases
+hosting = "axodotdev"

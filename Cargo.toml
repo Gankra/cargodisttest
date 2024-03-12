@@ -47,8 +47,6 @@ formula = "cargodisttest-custom"
 tap = "Gankra/homebrew-testtap"
 # Publish jobs to run in CI
 pr-run-mode = "plan"
-# Where to host releases
-hosting = ["axodotdev"]
 # Publish jobs to run in CI
 publish-jobs = ["homebrew"]
 # Whether to install an updater program

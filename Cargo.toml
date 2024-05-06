@@ -29,7 +29,7 @@ lto = "thin"
 # Config for 'cargo dist'
 [workspace.metadata.dist]
 # The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.14.0-prerelease.3"
+cargo-dist-version = "0.14.0-prerelease.6"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
@@ -56,6 +56,9 @@ publish-jobs = ["homebrew", "npm"]
 install-updater = false
 # Path that installers should place binaries in
 install-path = ["$CARGODISTTEST_HOME/bin", "~/.cargodisttest/bin"]
+# Publish GitHub Releases to this repo instead
+github-releases-repo = "Gankra/evil-workspace"
+allow-dirty = ["ci"]
 
 [workspace.metadata.dist.bin-aliases]
 cargodisttest = ["meowmeow", "supercoolcli"]

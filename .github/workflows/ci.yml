@@ -52,17 +52,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
+            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.3/cargodisttest-installer.sh | sh
             check-path: echo "$PATH"
             check-gh-path: cat "$GITHUB_PATH"
             add-gh-path: echo "$HOME/.ariadisttest/bin" >> "$GITHUB_PATH"
           - os: macos-latest
-            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
+            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.3/cargodisttest-installer.sh | sh
             check-path: echo "$PATH"
             check-gh-path: cat "$GITHUB_PATH"
             add-gh-path: echo "$HOME/.ariadisttest/bin" >> "$GITHUB_PATH"
           - os: windows-latest
-            install-expr: powershell -c "irm https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.ps1 | iex"
+            install-expr: powershell -c "irm https://github.com/Gankra/cargodisttest/releases/download/v0.20.3/cargodisttest-installer.ps1 | iex"
             check-path: echo "$env:PATH"
             check-gh-path: cat "$env:GITHUB_PATH"
             add-gh-path: echo "$HOME/.ariadisttest/bin" >> "$env:GITHUB_PATH"

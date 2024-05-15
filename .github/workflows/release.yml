@@ -194,69 +194,12 @@ jobs:
           path: |
             ${{ steps.cargo-dist.outputs.paths }}
             ${{ env.BUILD_MANIFEST_NAME }}
-
-  # Sign Windows artifacts with ssl.com
-  sign-windows-artifacts:
-    needs:
-      - plan
-      - build-global-artifacts
-    runs-on: "ubuntu-20.04"
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SIGN_DIR_IN: target/distrib/sign-input
-      SIGN_DIR_OUT: target/distrib/sign-output
-    steps:
-      # Get all the artifacts for the signing tasks to use
-      - name: Fetch local artifacts
-        uses: actions/download-artifact@v4
-        with:
-          # At the moment we hardcode this, as this is the only Windows
-          # triple we support.
-          name: artifacts-build-local-x86_64-pc-windows-msvc
-          path: target/distrib/
-      # Only try to sign files that the tool can handle
-      - name: Select Signable Artifacts
-        run: |
-          mkdir -p "$SIGN_DIR_IN"
-          mkdir -p "$SIGN_DIR_OUT"
-          for file in target/distrib/*.{msi,ps1}; do
-            [[ -e $file ]] && mv "$file" "$SIGN_DIR_IN" && echo "signing $file";
-          done
-      # Sign the files
-      - name: Sign Artifacts with CodeSignTool
-        uses: sslcom/esigner-codesign@develop
-        with:
-          command: batch_sign
-          username: ${{ secrets.SSLDOTCOM_USERNAME }}
-          password: ${{ secrets.SSLDOTCOM_PASSWORD }}
-          credential_id: ${{ secrets.SSLDOTCOM_CREDENTIAL_ID }}
-          totp_secret: ${{ secrets.SSLDOTCOM_TOTP_SECRET }}
-          dir_path: ${{ env.SIGN_DIR_IN }}
-          output_path: ${{ env.SIGN_DIR_OUT }}
-          environment_name: TEST
-      # Regenerate checksum files for things that have been signed
-      - name: Regenerate Checksums
-        run: |
-          pushd "$SIGN_DIR_OUT"
-          for filename in *; do
-            echo "checksuming $filename"
-            sha256sum --binary "$filename" > "$filename.sha256"
-          done
-          popd
-      # Upload the result, overwriting old files
-      - name: "Upload artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-build-local-x86_64-pc-windows-msvc
-          path: ${{ env.SIGN_DIR_OUT }}
-          overwrite: true
   # Determines if we should publish/announce
   host:
     needs:
       - plan
       - build-local-artifacts
       - build-global-artifacts
-      - sign-windows-artifacts
     # Only run if we're "publishing", and only if local and global didn't fail (skipped is fine)
     if: ${{ always() && needs.plan.outputs.publishing == 'true' && (needs.build-global-artifacts.result == 'skipped' || needs.build-global-artifacts.result == 'success') && (needs.build-local-artifacts.result == 'skipped' || needs.build-local-artifacts.result == 'success') }}
     env:
@@ -292,85 +235,15 @@ jobs:
           name: artifacts-dist-manifest
           path: dist-manifest.json
 
-  publish-homebrew-formula:
-    needs:
-      - plan
-      - host
-    runs-on: "ubuntu-20.04"
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PLAN: ${{ needs.plan.outputs.val }}
-      GITHUB_USER: "axo bot"
-      GITHUB_EMAIL: "admin+bot@axo.dev"
-    if: ${{ !fromJson(needs.plan.outputs.val).announcement_is_prerelease || fromJson(needs.plan.outputs.val).publish_prereleases }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: "Gankra/homebrew-testtap"
-          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-      # So we have access to the formula
-      - name: Fetch homebrew formulae
-        uses: actions/download-artifact@v4
-        with:
-          pattern: artifacts-*
-          path: Formula/
-          merge-multiple: true
-      # This is extra complex because you can make your Formula name not match your app name
-      # so we need to find releases with a *.rb file, and publish with that filename.
-      - name: Commit formula files
-        run: |
-          git config --global user.name "${GITHUB_USER}"
-          git config --global user.email "${GITHUB_EMAIL}"
-
-          for release in $(echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith(".rb")] | any)'); do
-            filename=$(echo "$release" | jq '.artifacts[] | select(endswith(".rb"))' --raw-output)
-            name=$(echo "$filename" | sed "s/\.rb$//")
-            version=$(echo "$release" | jq .app_version --raw-output)
-
-            git add "Formula/${filename}"
-            git commit -m "${name} ${version}"
-          done
-          git push
-
-  publish-npm:
-    needs:
-      - plan
-      - host
-    runs-on: "ubuntu-20.04"
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PLAN: ${{ needs.plan.outputs.val }}
-    if: ${{ !fromJson(needs.plan.outputs.val).announcement_is_prerelease || fromJson(needs.plan.outputs.val).publish_prereleases }}
-    steps:
-      - name: Fetch npm packages
-        uses: actions/download-artifact@v4
-        with:
-          pattern: artifacts-*
-          path: npm/
-          merge-multiple: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: |
-          for release in $(echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith("-npm-package.tar.gz")] | any)'); do
-            pkg=$(echo "$release" | jq '.artifacts[] | select(endswith("-npm-package.tar.gz"))' --raw-output)
-            npm publish --access public "./npm/${pkg}"
-          done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
   # Create a GitHub Release while uploading all files to it
   announce:
     needs:
       - plan
       - host
-      - publish-homebrew-formula
-      - publish-npm
     # use "always() && ..." to allow us to wait for all publish jobs while
     # still allowing individual publish jobs to skip themselves (for prereleases).
     # "host" however must run to completion, no skipping allowed!
-    if: ${{ always() && needs.host.result == 'success' && (needs.publish-homebrew-formula.result == 'skipped' || needs.publish-homebrew-formula.result == 'success') && (needs.publish-npm.result == 'skipped' || needs.publish-npm.result == 'success') }}
+    if: ${{ always() && needs.host.result == 'success' }}
     runs-on: "ubuntu-20.04"
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

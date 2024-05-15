@@ -72,7 +72,7 @@ jobs:
       - name: precheck GH_PATH
         run: ${{ matrix.check-gh-path }}
       - name: install cargodisttest
-        run: ${{ matrix.install_dist }}
+        run: ${{ matrix.install-expr }}
       - name: manual add GH_PATH
         run: ${{ matrix.add-gh-path }}
       - name: postcheck PATH

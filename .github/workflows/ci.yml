@@ -45,3 +45,21 @@ jobs:
       - name: Run cargo test
         run: |
           cargo test --workspace
+
+  installer-path-setup:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
+          - os: windows-latest
+            install-expr: powershell -c "irm https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.ps1 | iex"
+          - os: macos-latest
+            install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
+    steps:
+      - name: install cargodisttest
+        run: ${{ matrix.install_dist }}
+      - name: use cargodisttest
+        run: cargodisttest --version
+          

@@ -53,13 +53,27 @@ jobs:
         include:
           - os: ubuntu-latest
             install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
-          - os: windows-latest
-            install-expr: powershell -c "irm https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.ps1 | iex"
+            check-path: echo "$PATH"
+            check-gh-path: cat "$GITHUB_PATH"
           - os: macos-latest
             install-expr: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.sh | sh
+            check-path: echo "$PATH"
+            check-gh-path: cat "$GITHUB_PATH"
+          - os: windows-latest
+            install-expr: powershell -c "irm https://github.com/Gankra/cargodisttest/releases/download/v0.20.2/cargodisttest-installer.ps1 | iex"
+            check-path: echo "$env:PATH"
+            check-gh-path: cat "$env:GITHUB_PATH"
     steps:
+      - name: precheck PATH
+        run: ${{ matrix.check-path }}
+      - name: precheck GH_PATH
+        run: ${{ matrix.check-gh-path }}
       - name: install cargodisttest
         run: ${{ matrix.install_dist }}
+      - name: postcheck PATH
+        run: ${{ matrix.check-path }}
+      - name: postcheck GH_PATH
+        run: ${{ matrix.check-gh-path }}
       - name: use cargodisttest
         run: cargodisttest --version
           
